@@ -1,0 +1,8 @@
+<h2>Hello, this is a login page!!!</h2>
+
+<form method='post'> {% csrf_token %}
+    <input type = 'text' name = 'username' autofocus/>
+    <input type = 'password' name = 'password'/>
+    <input type = 'submit' name = 'Login'/>
+</form>
+{% if auth_msg %}<p>{{auth_msg}}</p>{% endif %}

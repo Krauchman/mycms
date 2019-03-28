@@ -31,7 +31,11 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'contests.apps.ContestsConfig',
+    'contest.apps.ContestsConfig',
+    'problem.apps.ProblemConfig',
+    'submission.apps.SubmissionConfig',
+    'sandbox.apps.SandboxConfig',
+    'nested_admin',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,7 +60,7 @@ ROOT_URLCONF = 'mycms.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -115,8 +119,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Celery Settings
+
+CELERY_BROKER_URL = 'amqp://localhost'
