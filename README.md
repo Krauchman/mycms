@@ -28,7 +28,7 @@ git submodule update --init
 #### 2.1. Python packages 
 To install python packages with pip:
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 It is recommended to use a virtual environment, since we are using specific versions of python packages.
 
