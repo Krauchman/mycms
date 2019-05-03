@@ -64,7 +64,7 @@ Run the following command to check some system settings
 isolate-check-environment --execute
 ```
 > If --execute is not specified, the recommended actions are written to stdout as an executable shell script, otherwise, using --execute will attempt to make changes to make the system behave more deterministically. The changes performed by --execute persist only until a reboot. To persist across reboots, the standard output from this script should be added to /etc/rc.local or some other script that is run on each boot.
-
+- - - -
 
 ### 4. Migrate
 Finally, do not forget to migrate
