@@ -20,8 +20,11 @@ def info(request, contest_pk=1):
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     contest_state = contest_state[0], '%d:%02d:%02d' % (hours, minutes, seconds)
-
+    problems = contest.problem_set.all()
+    
     context = {
+        'problems': problems,
+        'score': get_object_or_404(Participant, user=request.user).points,
         'contest': contest,
         'username': request.user.username,
         'current_time': datetime.now(timezone.utc),
@@ -72,3 +75,9 @@ def ranking(request, contest_pk):
         'participants': participants,
     }
     return render(request, 'contests/ranking.html', context)
+
+def contest_list(request):
+    context = {
+        'contest_list': Contest.objects.all(),
+    }
+    return render(request, 'contests/contest_list.html', context)

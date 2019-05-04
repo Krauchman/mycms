@@ -7,4 +7,4 @@ class SubmitForm(forms.ModelForm):
 
     class Meta:
         model = Submission
-        fields = ('problem', 'language', 'source')
+        fields = ('language', 'source')
