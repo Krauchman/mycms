@@ -16,6 +16,7 @@ def problem_page(request, contest_pk, problem_pk):
             sub = form.save(commit=False)
             sub.participant = request.user.participant_set.get(contest__pk=contest_pk)
             sub.sent_date = timezone.now()
+            sub.problem = get_object_or_404(Problem, problem_id=problem_pk)
             problem_infos = ProblemInfo.objects.filter(problem=get_object_or_404(Problem, problem_id=problem_pk), contest__pk=contest_pk)
             if problem_infos:
                 sub.problem_info = problem_infos.first()
