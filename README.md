@@ -71,15 +71,15 @@ Finally, do not forget to migrate
 ```bash
 python3 manage.py migrate
 ```
-
+- - - -
 
 Starting the development (!) server
 -------------------
-Start django server
+To start the django development server
 ```bash
 python3 manage.py runserver
 ```
-You also should start a celery worker to run solutions and generate output for tests
+You should also start a celery worker to run solutions and generate output for tests
 ```bash
 celery -A mycms worker -l info
 ```
