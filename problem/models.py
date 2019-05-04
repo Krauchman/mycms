@@ -76,7 +76,7 @@ class ProblemInfo(models.Model):
 
 class Subtask(models.Model):
     subtask_id = models.AutoField(primary_key=True)
-    points = models.IntegerField(default=0)
+    points = models.IntegerField(default=100)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)
 
