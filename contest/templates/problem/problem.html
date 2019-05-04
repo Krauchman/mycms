@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ statement.name }}</title>
 </head>
+
 <body>
     <h1>{{ statement.name}}</h1>
     <p>формат ввода {{ statement.input_file }}</p>
@@ -16,12 +18,19 @@
     <b>Выходные данные</b>
     <p>{{ statement.output }}</p>
     {% for i in samples %}
-        <p>{{ i.input }}</p>
+    <p>{{ i.input }}</p>
     {% endfor %}
     {% for i in samples %}
-        <p>{{ i.output }}</p>
+    <p>{{ i.output }}</p>
     {% endfor %}
     <b>Примечание</b>
     <p>{{ statement.notes }}</p>
+    <h3>Submit your solution</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit!</button>
+    </form>
 </body>
+
 </html>

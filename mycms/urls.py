@@ -25,4 +25,5 @@ urlpatterns = [
     path('accounts/login/', contest_views.login_page, name='login-page'),
     path('logout/', contest_views.logout_page, name='logout-page'),
     path('nested-admin/', include('nested_admin.urls')),
+    path('', contest_views.contest_list, name='main-page'),
 ]
