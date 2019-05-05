@@ -33,8 +33,14 @@ pip3 install -r requirements.txt
 It is recommended to use a virtual environment, since we are using specific versions of python packages.
 
 #### 2.2. RabbitMQ for Celery
-We are using [RabbitMQ](https://www.rabbitmq.com/) as a task broker for Celery. 
-To install it on the newer versions of Ubuntu (16.04, 18.04), run
+We are using [RabbitMQ](https://www.rabbitmq.com/) as a task broker for Celery.
+
+First, update your system:
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+```
+To install RabbitMQ on newer versions of Ubuntu (16.04, 18.04), run
 ```bash
 apt-get install -y erlang
 apt-get install rabbitmq-server
