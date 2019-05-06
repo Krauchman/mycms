@@ -7,7 +7,7 @@ from .models import Contest, Participant
 
 
 @login_required(redirect_field_name='login-page')
-def info(request, contest_pk=1):
+def info(request, contest_pk):
     contest = get_object_or_404(Contest, pk=contest_pk)
 
     if not contest.is_active:
