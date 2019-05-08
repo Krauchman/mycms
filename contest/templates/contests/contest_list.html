@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Ranking</title>
-  </head>
-  <body>
-    <ol>
-      {% for contest in contest_list %}
-      <li>
-        <a href="contest/{{ contest.pk }}">{{ contest.title }}</a>
-      </li>
-      {% endfor %}
-    </ol>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Ranking</title>
+</head>
+
+<body>
+  <ol>
+    {% for contest in contest_list %}
+    <li>
+      {% url 'contest-info' contest.pk as the_url %}
+      <a href="{{ the_url }}">{{ contest.title }}</a>
+    </li>
+    {% endfor %}
+  </ol>
+</body>
+
 </html>

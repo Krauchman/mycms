@@ -8,7 +8,7 @@
 <h1>The contest is over.</h1>
 {% endif %}
 
-<h3>Your score is {{ score }} </h3>
+<h3>Hi! Your score is {{ score }} </h3>
 <p>Start Time: {{ contest.start_time|date:"M d, h:m:s" }}</p>
 <p>End Time: {{ contest.end_time|date:"M d, h:m:s" }}</p>
 <p>Current time: {{ current_time|date:"M d, h:m:s" }}</p>
@@ -16,7 +16,8 @@
 {% for problem in problems %}
 <h2>
   <li>
-    <a href="problem/{{ problem.problem_id }}">
+    {% url 'problem-page' contest.pk problem.problem_id as the_url %}
+    <a href="{{ the_url }}">
       {{ problem.name }}
     </a>
   </li>
