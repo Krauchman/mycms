@@ -113,6 +113,11 @@ def script_test(instance, script_line, gen_source, gen_name, test, full_subtask)
 
 def create_tests(instance, tests, full_subtask):
     for test in tests:
+        _subtask = full_subtask
+        if 'group' in test:
+            if not Subtask.objects.filter(problem=instance, description = 'Subtask ' + test['group']):
+                Subtask.objects.create(problem=instance, description = 'Subtask ' + test['group'])
+            _subtask = Subtask.objects.get(problem=instance, description = 'Subtask ' + test['group'])
         if test['manual'] is True:
             manual_test(instance, test, full_subtask)
         else:
@@ -211,7 +216,7 @@ def process_problem(prob_pk):
     Problem.objects.filter(pk=instance.pk).update(checker=checker)
     Problem.objects.filter(pk=instance.pk).update(solution=solution)
 
-    full_subtask = Subtask(problem=Problem.objects.get(pk=instance.pk), description='Full Subtask')
+    full_subtask = Subtask(problem=Problem.objects.get(pk=instance.pk), description='Subtask All', points = 0)
     full_subtask.save()
 
     create_tests(instance, tests, full_subtask)
