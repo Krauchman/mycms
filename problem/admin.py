@@ -59,16 +59,16 @@ class SubtaskInline(nested_admin.NestedStackedInline):
     classes = ['collapse']
 
     fields = ['description', 'points']
-    readonly_fields = ['description', 'points']
+    # readonly_fields = ['description', 'points']
 
-    def has_add_permission(self, request, obj):
-        return False
+    def has_add_permission(self, request, obj=None):
+        return False # to fix
 
     def has_change_permission(self, request, obj=None):
-        return False
+        return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
 
 class StatementInline(nested_admin.NestedStackedInline):

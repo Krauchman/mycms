@@ -81,7 +81,7 @@ class Subtask(models.Model):
     description = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.description
+        return self.problem.name + ' -- ' + self.description
 
 
 class Test(models.Model):
