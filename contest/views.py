@@ -37,7 +37,7 @@ def info(request, contest_pk):
 def login_page(request):
     context = {}
     if request.user.is_authenticated:
-        return redirect('contest-info')
+        return redirect('main-page')
     if request.method == 'POST':
         if 'username' not in request.POST:
             context['auth_msg'] = 'Do not have a username'
@@ -49,13 +49,13 @@ def login_page(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('contest-info')
+                return redirect('main-page')
             else:
                 context['auth_msg'] = 'Wrong credentials'
     if 'auth_msg' not in context:
         context['auth_msg'] = 'Enter your username and password'
     if request.user.is_authenticated:
-        return redirect('contest-info')
+        return redirect('main-page')
     return render(request, 'login.html', context)
 
 

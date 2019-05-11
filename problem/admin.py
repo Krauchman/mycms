@@ -57,12 +57,12 @@ class SubtaskInline(nested_admin.NestedStackedInline):
     model = Subtask
     inlines = [TestInline]
     classes = ['collapse']
-
+    extra = 0
     fields = ['description', 'points']
     # readonly_fields = ['description', 'points']
 
     def has_add_permission(self, request, obj=None):
-        return False # to fix
+        return True
 
     def has_change_permission(self, request, obj=None):
         return True
