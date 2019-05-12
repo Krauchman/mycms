@@ -173,12 +173,22 @@ class ProblemAdmin(nested_admin.NestedModelAdmin):
 
 
 class TestAdmin(nested_admin.NestedModelAdmin):
-    fields = ['test_id', 'in_statement', 'input', 'output']
+    fields = ['test_id', 'in_statement', 'input', 'output', 'subtask']
     readonly_fields = ['test_id', 'input', 'output', 'in_statement']
 
+    def get_form(self, request, obj=None, **kwargs):
+        request._obj_ = obj
+        return super(TestAdmin, self).get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        field = super(TestAdmin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs)
+        if db_field.name == "subtask":
+            field.queryset = Subtask.objects.filter(problem=request._obj_.problem)
+        return field
+    
     def has_module_permission(self, request):
         return False
-
 
 class PolygonAccountAdmin(nested_admin.NestedModelAdmin):
     fields = ['name', 'key', 'secret']

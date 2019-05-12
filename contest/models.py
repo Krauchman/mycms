@@ -29,7 +29,7 @@ class Contest(models.Model):
         FINISHED = 2
         FROZEN = 3
 
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
