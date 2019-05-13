@@ -23,7 +23,7 @@ class Problem(models.Model):
         READY = 1
         FAILED = 2
 
-    problem_id = models.CharField(max_length=20, unique=True, blank=True)
+    problem_id = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=100, unique=True)
     testset_name = models.CharField(max_length=100, default="tests")
     checker = models.TextField(blank=True)
