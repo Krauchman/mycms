@@ -119,7 +119,7 @@ def create_tests(instance, tests, full_subtask):
                 Subtask.objects.create(problem=instance, description = 'Subtask ' + test['group'])
             _subtask = Subtask.objects.get(problem=instance, description = 'Subtask ' + test['group'])
         if test['manual'] is True:
-            manual_test(instance, test, full_subtask)
+            manual_test(instance, test, _subtask)
         else:
             try:
                 generator_source = problem_api_request('viewFile', instance, is_source_file=True, extra_params={
@@ -130,7 +130,7 @@ def create_tests(instance, tests, full_subtask):
                 fail_problem_processing(instance, e=e, message='Error loading generator for test ' + str(test.test_id))
                 return
             script_test(instance, test['scriptLine'], generator_source,
-                        test['scriptLine'].split()[0], test, full_subtask)
+                        test['scriptLine'].split()[0], test, _subtask)
 
 
 def get_checker_source(instance):
