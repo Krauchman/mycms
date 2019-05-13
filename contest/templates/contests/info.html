@@ -1,11 +1,14 @@
-<h1>{{ contest.title }}</h1>
+{% extends 'index.html' %}
+{% block title %}{{ contest.title }}{% endblock %}
 
+{% block content %}
+<h1 class="mt-4"> {{ contest.title }} </h1>
 {% if contest_state.0 == STATE.IN_PROGRESS %}
-<h1>In progress. Time left: {{ contest_state.1 }}</h1>
+<h2>In progress. Time left: {{ contest_state.1 }}</h2>
 {% elif contest_state.0 == STATE.NOT_STARTED %}
-<h1>Contest starts in: {{ contest_state.1 }}</h1>
+<h2>Contest starts in: {{ contest_state.1 }}</h2>
 {% else %}
-<h1>The contest is over.</h1>
+<h2>The contest is over.</h2>
 {% endif %}
 
 <h3>Hi! Your score is {{ score }} </h3>
@@ -23,3 +26,4 @@
   </li>
 </h2>
 {% endfor %}
+{% endblock %}
