@@ -3,7 +3,7 @@ from os.path import join as path_join
 from celery import shared_task
 from billiard import current_process
 
-from .models import Submission, RunInfo
+from .models import Submission, RunInfo, RunSubtaskInfo
 from sandbox.sandbox_manager import Sandbox
 
 
@@ -133,6 +133,9 @@ def evaluate_submission(sub_pk):
                 cur_points = 0
             run_info.save()
         sub.points += cur_points
+        if not RunSubtaskInfo.objects.filter(submission=sub, subtask=subtask):
+            RunSubtaskInfo.objects.create(submission=sub, subtask=subtask)
+        RunSubtaskInfo.objects.filter(submission=sub, subtask=subtask).update(points=cur_points)
         sub.save()
     sub.status = Submission.STATUS.FINISHED
     sub.save()

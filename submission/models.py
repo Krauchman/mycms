@@ -1,7 +1,7 @@
 from django.db import models
 
 from contest.models import Contest, Participant
-from problem.models import Problem, ProblemInfo, Test
+from problem.models import Problem, ProblemInfo, Test, Subtask
 
 
 class Submission(models.Model):
@@ -97,3 +97,11 @@ class RunInfo(models.Model):
 
     def message(self):
         return RunInfo.STATUS.DESC[self.status]
+
+class RunSubtaskInfo(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
+    subtask = models.ForeignKey(Subtask, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.submission.pk) + '+' + str(self.subtask.subtask_id)
