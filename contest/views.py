@@ -76,8 +76,9 @@ def ranking(request, contest_pk):
     }
     return render(request, 'contests/ranking.html', context)
 
+
 def contest_list(request):
     context = {
-        'contest_list': Contest.objects.all(),
+        'contest_list': Contest.objects.exclude(is_active=False),
     }
     return render(request, 'contests/contest_list.html', context)
