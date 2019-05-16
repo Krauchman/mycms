@@ -25,7 +25,7 @@ def login_page(request):
         context['auth_msg'] = 'Enter your username and password'
     if request.user.is_authenticated:
         return redirect('main-page')
-    return render(request, 'login.html', context)
+    return render(request, 'user/login.html', context)
 
 
 @login_required(redirect_field_name='login-page')

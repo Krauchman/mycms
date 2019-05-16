@@ -35,6 +35,7 @@ def info(request, contest_pk):
     return render(request, 'contests/info.html', context)
 
 
+@login_required(redirect_field_name='login-page')
 def ranking(request, contest_pk):
     cur_contest = get_object_or_404(Contest, pk=contest_pk)
     participants = list(Participant.objects.filter(contest__title=cur_contest.title).order_by(
