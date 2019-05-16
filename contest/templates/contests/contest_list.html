@@ -1,13 +1,22 @@
 {% extends 'index.html' %}
 {% block title %}Contest list{% endblock %}
 {% block content %}
-<h1 class="mt-4"> Contest list </h1>
-<ol>
-  {% for contest in contest_list %}
-  <li>
-    {% url 'contest-info' contest.pk as the_url %}
-    <a href="{{ the_url }}">{{ contest.title }}</a>
-  </li>
-  {% endfor %}
-</ol>
+    {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}"
+                     role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h1 class="mt-4"> Contest list </h1>
+    <ol>
+        {% for contest in contest_list %}
+            <li>
+                {% url 'contest-info' contest.pk as the_url %}
+                <a href="{{ the_url }}">{{ contest.title }}</a>
+            </li>
+        {% endfor %}
+    </ol>
 {% endblock %}

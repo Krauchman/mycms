@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, HttpResponse
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timezone
@@ -13,7 +14,8 @@ def info(request, contest_pk):
     if not contest.is_active:
         raise Http404("Contest is not active!")
     if not list(Participant.objects.filter(user=request.user, contest=contest)):
-        return HttpResponse("You are not registered for this contest.")
+        messages.error(request, 'You are not registered for the contest.')
+        return redirect('main-page')
 
     contest_state = contest.get_state()
     seconds = contest_state[1].seconds
@@ -24,7 +26,7 @@ def info(request, contest_pk):
     
     context = {
         'problems': problems,
-        'score': get_object_or_404(Participant, user=request.user).points,
+        'score': get_object_or_404(Participant, user=request.user, contest=contest).points,
         'contest': contest,
         'username': request.user.username,
         'current_time': datetime.now(timezone.utc),

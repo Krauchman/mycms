@@ -52,10 +52,8 @@ class Contest(models.Model):
 
     def get_state(self):
         cur_time = datetime.now(timezone.utc)
-        diff = cur_time - self.start_time
         if cur_time <= self.start_time:
             return Contest.STATE.NOT_STARTED, self.start_time - cur_time
-        diff = self.end_time - cur_time
         if self.end_time < cur_time:
             return Contest.STATE.FINISHED, cur_time - self.end_time
         return Contest.STATE.IN_PROGRESS, self.end_time - cur_time
