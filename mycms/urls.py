@@ -15,15 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from problem import views as problem_views
 from contest import views as contest_views
+from user import views as user_views
 import nested_admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('contest/', include('contest.urls')),
-    path('accounts/login/', contest_views.login_page, name='login-page'),
-    path('logout/', contest_views.logout_page, name='logout-page'),
-    path('nested-admin/', include('nested_admin.urls')),
+    path('accounts/login/', user_views.login_page, name='login-page'),
+    path('logout/', user_views.logout_page, name='logout-page'),
     path('', contest_views.contest_list, name='main-page'),
+
+    path('nested-admin/', include('nested_admin.urls')),
 ]

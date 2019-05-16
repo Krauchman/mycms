@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'problem.apps.ProblemConfig',
     'submission.apps.SubmissionConfig',
     'sandbox.apps.SandboxConfig',
+    'user.apps.UserConfig',
     'nested_admin',
 
     'django.contrib.admin',

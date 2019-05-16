@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timezone
 from .models import Contest, Participant
@@ -34,37 +33,6 @@ def info(request, contest_pk):
         'STATE': Contest.STATE,
     }
     return render(request, 'contests/info.html', context)
-
-
-def login_page(request):
-    context = {}
-    if request.user.is_authenticated:
-        return redirect('main-page')
-    if request.method == 'POST':
-        if 'username' not in request.POST:
-            context['auth_msg'] = 'Do not have a username'
-        elif 'password' not in request.POST:
-            context['auth_msg'] = 'Do not have a password'
-        else:
-            username = request.POST['username']
-            password = request.POST['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('main-page')
-            else:
-                context['auth_msg'] = 'Wrong credentials'
-    if 'auth_msg' not in context:
-        context['auth_msg'] = 'Enter your username and password'
-    if request.user.is_authenticated:
-        return redirect('main-page')
-    return render(request, 'login.html', context)
-
-
-@login_required(redirect_field_name='login-page')
-def logout_page(request):
-    logout(request)
-    return redirect('login-page')
 
 
 def ranking(request, contest_pk):
