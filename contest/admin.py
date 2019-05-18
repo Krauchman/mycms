@@ -100,23 +100,23 @@ class ContestAdmin(nested_admin.NestedModelAdmin):
         users = User.objects.exclude(participant__contest=contest)
         problems = Problem.objects.filter(status=Problem.STATUS.READY).exclude(probleminfo__contest=contest)
 
-        extra_context['users'] = users
-        extra_context['problems'] = problems
+        extra_context['nonparticipating_users'] = users
+        extra_context['unused_problems'] = problems
 
         return super().change_view(request, object_id, form_url=form_url, extra_context=extra_context)
 
     def response_change(self, request, contest):
         super().response_change(request, contest)
 
-        if "users" in request.POST:
-            users = request.POST.getlist('users')
+        if "users_to_add" in request.POST:
+            users = request.POST.getlist('users_to_add')
             for user_pk in users:
                 user = User.objects.get(pk=user_pk)
                 if not user.participant_set.filter(contest=contest):
                     user.participant_set.create(contest=contest)
 
-        if "problems" in request.POST:
-            problems = request.POST.getlist('problems')
+        if "problems_to_add" in request.POST:
+            problems = request.POST.getlist('problems_to_add')
             for problem_id in problems:
                 problem = Problem.objects.get(problem_id=problem_id)
                 if not ProblemInfo.objects.filter(contest=contest, problem=problem):

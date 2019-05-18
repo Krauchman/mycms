@@ -12,8 +12,8 @@
                         <label for="">Select users:</label>
 
                         <div class="related-widget-wrapper">
-                            <select name="users" id="id_user" multiple>
-                                {% for user in users %}
+                            <select name="users_to_add" id="id_user" multiple>
+                                {% for user in nonparticipating_users %}
                                     <option value="{{ user.pk }}">{{ user.username }}</option>
                                 {% endfor %}
                             </select>
@@ -33,8 +33,8 @@
                         <label for="">Select problems:</label>
 
                         <div class="related-widget-wrapper">
-                            <select name="problems" id="id_problem" multiple>
-                                {% for problem in problems %}
+                            <select name="problems_to_add" id="id_problem" multiple>
+                                {% for problem in unused_problems %}
                                     <option value="{{ problem.problem_id  }}">{{ problem.problem_id }}-{{ problem.name }}-{{ problem.statement.name }}</option>
                                 {% endfor %}
                             </select>
