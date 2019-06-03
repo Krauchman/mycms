@@ -57,10 +57,20 @@
 <b>Примечание</b>
 <p>{{ statement.notes }}</p>
 <h3>Submit your solution</h3>
-<form method="POST">
+<form method="POST" style="width:70%">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit!</button>
+    <div class="form-group">
+        <label for="sub_language">Language</label>
+        <select class="form-control" id="sub_language" name="sub_language">
+            <option value="0">C++11</option>
+            <option value="1">Java</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="sub_source">Source code</label>
+        <textarea class="form-control" id="sub_source" rows="10" name="sub_source"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" id="submit">Submit!</button>
 </form>
 <h4 class="mt-4"> Your submissions: </h4>
 <div class="d-flex justify-content-start mt-4 mb-4">
@@ -70,7 +80,7 @@
         </div>
         <ol class="list-group list-group-flush">
             {% for submission in submissions %}
-            <li class="list-group-item"><samp>
+            <li class="list-group-item"><samp id="status_{{submission.pk}}">
                     {% if submission.status == 0 %}
                     In queue...
                     {% elif submission.status == 1 %}
@@ -94,7 +104,8 @@
         </div>
         <ol class="list-group list-group-flush">
             {% for submission in submissions %}
-            <li class="list-group-item"><samp>{{ submission.points }}/{{ total }}</samp></li>
+            <li class="list-group-item"><samp><span
+                        id="pts_{{submission.pk}}">{{ submission.points }}</span>/{{ total }}</samp></li>
             {% endfor %}
         </ol>
     </div>
@@ -104,9 +115,9 @@
         </div>
         <ol class="list-group list-group-flush">
             {% for submission in submissions %}
-            <li class="list-group-item text-primary" type="button" data-toggle="modal"
-                data-target="#viewSub{{submission.pk}}">
-                View
+            <li class="list-group-item text-primary" type="button"><u><samp data-toggle="modal"
+                        data-target="#viewSub{{submission.pk}}" onclick="getSubtasksPtsInfo({{submission.pk}})">
+                        View</samp></u>
             </li>
             {% endfor %}
         </ol>
@@ -146,11 +157,8 @@
                             {% for subtask in subtasks %}
                             <li class="list-group-item">
                                 <code>
-                                    {% for runSubtask_info in runSubtask_infos %}
-                                        {% if runSubtask_info.submission == submission and runSubtask_info.subtask == subtask %}
-                                            {{runSubtask_info.points}}
-                                        {% endif %}
-                                    {% endfor %}
+                                    <span id="subtaskPts_{{submission.pk}}_{{subtask.pk}}">
+                                </span>
                                     / {{subtask.points}}
                                 </code>
                             </li>
@@ -166,26 +174,20 @@
                             <li class="list-group-item"><span type="button" data-toggle="collapse"
                                     data-target="#collapse{{submission.pk}}-{{subtask.subtask_id}}"
                                     aria-expanded="false" class="text-primary"
-                                    aria-controls="collapse{{submission.pk}}-{{subtask.subtask_id}}">
+                                    aria-controls="collapse{{submission.pk}}-{{subtask.subtask_id}}"
+                                    onclick="get_info({{submission.pk}}, {{subtask.subtask_id}})">
                                     View
                                 </span>
                                 <div class="collapse" id="collapse{{submission.pk}}-{{subtask.subtask_id}}">
                                     <div class="card card-body">
                                         <table class="table table-striped">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Verdict</th>
-                                                <th>Time (ms)</th>
-                                            </tr>
-                                            {% for runinfo in run_infos %}
-                                            {% if runinfo.test.subtask.subtask_id == subtask.subtask_id and runinfo.submission.pk == submission.pk %}
-                                            <tr>
-                                                <td>{{ runinfo.test.test_id }}</td>
-                                                <td>{{ runinfo.message }}</td>
-                                                <td>{{ runinfo.time }}</td>
-                                            </tr>
-                                            {% endif %}
-                                            {% endfor %}
+                                            <tbody id="info_{{submission.pk}}_{{subtask.subtask_id}}">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Verdict</th>
+                                                    <th>Time (ms)</th>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -204,4 +206,89 @@
     </div>
 </div>
 {% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+    const username = '{{ username }}';
+    const userSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/user/' + username + '/');
+    addInfo = function (attr, test_id, message, time) {
+        let node = document.createElement("tr");
+        let tmpNode = document.createElement("td");
+        tmpNode.textContent = test_id;
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("td");
+        tmpNode.textContent = message;
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("td");
+        tmpNode.textContent = time;
+        node.appendChild(tmpNode);
+        document.querySelector(attr).appendChild(node);
+    }
+    addTitleInfo = function (attr) {
+        let node = document.createElement("tr");
+        let tmpNode = document.createElement("th");
+        tmpNode.textContent = "#";
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("th");
+        tmpNode.textContent = "Verdict";
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("th");
+        tmpNode.textContent = "time";
+        node.appendChild(tmpNode);
+        document.querySelector(attr).appendChild(node);
+    }
+    get_info = function (submission_id, subtask_id) {
+        userSocket.send(JSON.stringify({
+            'type': 'get_info',
+            'submission': submission_id,
+            'subtask': subtask_id
+        }))
+    }
+    getSubtasksPtsInfo = function (submission_pk) {
+        userSocket.send(JSON.stringify({
+            'type': 'getSubtasksPtsInfo',
+            'submission': submission_pk
+        }))
+    }
+    userSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data['type'] == 'sub_notify') {
+            const sub_pk = data['submission_pk'];
+            const status = data['status'];
+            const points = data['sub_points'];
+            document.querySelector('#status_' + sub_pk).innerText = status;
+            document.querySelector('#pts_' + sub_pk).innerText = points;
+        }
+        else if (data['type'] == 'run_info') {
+            const message = data['message'];
+            const time = data['time'];
+            const test_id = data['test_id'];
+            const attr = data['attr'];
+            addInfo(attr, test_id, message, time);
+        }
+        else if (data['type'] == 'runInfos') {
+            const info_data = JSON.parse(data['data']);
+            const attr = data['attr'];
+            $(attr).empty();
+            addTitleInfo(attr);
+            for (let counter = 0; counter < info_data.length; counter++) {
+                addInfo(attr, data['test_ids'][counter], info_data[counter]['fields']['status'], info_data[counter]['fields']['time']);
+            }
+        }
+        else if (data['type'] == 'subtaskPtsInfos') {
+            const info_data = JSON.parse(data['data']);
+            const attr = data['attr'];
+            for (let counter = 0; counter < info_data.length; counter++) {
+                $(attr + info_data[counter]["pk"]).empty();
+                document.querySelector(attr + data["sub_desc"][counter]).textContent = info_data[counter]["fields"]["points"];
+            }
+        }
+    };
+
+    userSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
 {% endblock %}
