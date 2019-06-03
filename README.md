@@ -54,10 +54,12 @@ Check the status to make sure everything works
 ```bash
 systemctl status rabbitmq-server
 ```
-#### 3. Configure Django Channels
+- - - -
+
+### 3. Configure Django Channels
 We are using [Channels](https://channels.readthedocs.io/en/latest/) for constant communication with the server.
 
-First, to start a Redis server on port 6379, run the following command:
+To start a Redis server on port 6379, run the following command:
 ```bash
 sudo docker run -p 6379:6379 -d redis:2.8
 ```
