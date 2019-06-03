@@ -54,17 +54,24 @@ Check the status to make sure everything works
 ```bash
 systemctl status rabbitmq-server
 ```
+#### 3. Configure Django Channels
+We are using [Channels](https://channels.readthedocs.io/en/latest/) for constant communication with the server.
+
+First, to start a Redis server on port 6379, run the following command:
+```bash
+sudo docker run -p 6379:6379 -d redis:2.8
+```
 - - - -
 
-### 3. Configure isolate
+### 4. Configure isolate
 
-#### 3.1. Build isolate binary
+#### 4.1. Build isolate binary
 To build the isolate submodule run the following command from inside its directory
 ```bash
 make isolate
 ```
 
-#### 3.2. Configure environment
+#### 4.2. Configure environment
 Run the following command to check some system settings
 ```bash
 isolate-check-environment --execute
@@ -72,7 +79,7 @@ isolate-check-environment --execute
 > If --execute is not specified, the recommended actions are written to stdout as an executable shell script, otherwise, using --execute will attempt to make changes to make the system behave more deterministically. The changes performed by --execute persist only until a reboot. To persist across reboots, the standard output from this script should be added to /etc/rc.local or some other script that is run on each boot.
 - - - -
 
-### 4. Migrate
+### 5. Migrate
 Finally, do not forget to migrate
 ```bash
 python3 manage.py migrate
