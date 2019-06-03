@@ -25,7 +25,7 @@ def submit(request, contest_pk):
             sub.contest = Contest.objects.get(pk=contest_pk)
             sub.save()
 
-            evaluate_submission.delay(sub.pk)
+            evaluate_submission.delay(sub_pk = sub.pk, username = request.user.username)
 
             return redirect('submission-page', contest_pk=contest_pk, sub_pk=sub.pk)
     else:
