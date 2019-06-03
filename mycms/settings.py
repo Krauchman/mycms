@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'submission.apps.SubmissionConfig',
     'sandbox.apps.SandboxConfig',
     'nested_admin',
+    'channels',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -73,8 +74,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mycms.wsgi.application'
+ASGI_APPLICATION = 'mycms.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
+WSGI_APPLICATION = 'mycms.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
