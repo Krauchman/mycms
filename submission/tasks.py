@@ -160,6 +160,14 @@ def evaluate_submission(sub_pk, username=None):
                     run_info.status = RunInfo.STATUS.OK
                     run_info.time = float(meta['time'])
                     test.output = run_info.output
+                    inputBR = test.input.count("\n")
+                    outputBR = test.output.count("\n")
+                    br_numberInput = max(0, outputBR - inputBR)
+                    br_numberOutput = max(0, inputBR - outputBR)
+                    for _ in range(br_numberInput):
+                        test.input += "\r\n"
+                    for _ in range(br_numberOutput):
+                        test.output += "\r\n"
                     test.save()
                 else:
                     ans_file = 'test.a'
