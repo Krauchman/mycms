@@ -3,7 +3,7 @@ from os.path import join as path_join
 from celery import shared_task
 from billiard import current_process
 
-from .models import Submission, RunInfo, RunSubtaskInfo
+from .models import Submission, RunInfo, RunSubtaskInfo, RunFullInfo
 from sandbox.sandbox_manager import Sandbox
 
 from channels.layers import get_channel_layer
@@ -132,6 +132,7 @@ def evaluate_submission(sub_pk, username=None):
         if participant.submission_set.filter(problem=sub.problem).order_by('-points'):
             participant.points -= participant.submission_set.filter(problem=sub.problem).order_by(
                 '-points').first().points
+    isFull = True
     for subtask in sub.problem.subtask_set.order_by('subtask_id'):
         cur_points = subtask.points
         for test in subtask.test_set.order_by('test_id'):
@@ -198,6 +199,7 @@ def evaluate_submission(sub_pk, username=None):
                 run_info.status = RunInfo.STATUS.XX
             if run_info.status != RunInfo.STATUS.OK:
                 cur_points = 0
+                isFull = False
             run_info.save()
             if username:
                 status_socket("users_%s" % username, {
@@ -216,6 +218,7 @@ def evaluate_submission(sub_pk, username=None):
         sub.save()
     sub.status = Submission.STATUS.FINISHED
     sub.save()
+
     if username:
         status_socket("users_%s" % username, {
         "type": "notify",
@@ -223,7 +226,13 @@ def evaluate_submission(sub_pk, username=None):
         "status": sub.status,
         "points": sub.points
         })
+
     if not sub.is_invocation:
         participant.points += participant.submission_set.filter(problem=sub.problem).order_by('-points').first().points
         participant.save()
+
+        active = True
+        if RunFullInfo.objects.filter(isFull=True,problem=sub.problem,participant=participant):
+            active = False
+        RunFullInfo.objects.create(submission=sub, problem=sub.problem,participant=participant,points=sub.points,isFull=isFull,active=active)
     sandbox.cleanup()

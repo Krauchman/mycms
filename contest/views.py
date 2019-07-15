@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timezone
 from .models import Contest, Participant
-
+from problem.models import Problem
+from submission.models import RunFullInfo
 
 @login_required(redirect_field_name='login-page')
 def info(request, contest_pk):
@@ -69,10 +70,14 @@ def ranking(request, contest_pk):
     cur_contest = get_object_or_404(Contest, pk=contest_pk)
     participants = list(Participant.objects.filter(contest__title=cur_contest.title).order_by(
         '-points',
-        'user__username'
+        'penalty'
     ))
+    # TODO: fix the order
+    problems = cur_contest.problem_set.all()
     context = {
         'participants': participants,
+        'contest': cur_contest,
+        'problems': problems,
     }
     return render(request, 'contests/ranking.html', context)
 

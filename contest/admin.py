@@ -127,3 +127,4 @@ class ContestAdmin(nested_admin.NestedModelAdmin):
 
 
 admin.site.register(Contest, ContestAdmin)
+admin.site.register(Participant)

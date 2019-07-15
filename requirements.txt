@@ -15,3 +15,6 @@ urllib3==1.24.1
 vine==1.2.0
 channels==2.1.7
 channels-redis==2.4.0
+djangorestframework==3.9.4
+markdown==3.1.1
+django-filter==2.1.0

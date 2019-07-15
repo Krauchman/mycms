@@ -34,6 +34,11 @@ class Contest(models.Model):
     end_time = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
 
+    class TYPE:
+        ACM = 0
+        IOI = 1
+    type = models.IntegerField(choices=[(TYPE.ACM, 'ACM'), (TYPE.IOI, 'IOI')], default=TYPE.ACM)
+
     class Meta:
         order_with_respect_to = 'title'
 
@@ -63,7 +68,7 @@ class Contest(models.Model):
 
 class Participant(models.Model):
     points = models.IntegerField(default=0)
-
+    penalty = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     contest = models.ForeignKey(Contest, on_delete=models.CASCADE)
 

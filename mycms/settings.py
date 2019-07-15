@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'sandbox.apps.SandboxConfig',
     'nested_admin',
     'channels',
+    'rest_framework',
 
     'django.contrib.admin',
     'django.contrib.auth',

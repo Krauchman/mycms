@@ -105,3 +105,13 @@ class RunSubtaskInfo(models.Model):
 
     def __str__(self):
         return str(self.submission.pk) + '+' + str(self.subtask.subtask_id)
+
+class RunFullInfo(models.Model):
+    submission = models.OneToOneField(Submission, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+    full = models.BooleanField(default=False)
+    active = models.BooleanField(default=True) # problem is already solved
+    def __str__(self):
+        return str(self.submission.pk) + '*' + str(self.subtask.subtask_id)
