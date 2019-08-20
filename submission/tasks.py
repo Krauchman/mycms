@@ -232,7 +232,7 @@ def evaluate_submission(sub_pk, username=None):
         participant.save()
 
         active = True
-        if RunFullInfo.objects.filter(isFull=True,problem=sub.problem,participant=participant):
+        if RunFullInfo.objects.filter(full=True,problem=sub.problem,participant=participant):
             active = False
         RunFullInfo.objects.create(submission=sub, problem=sub.problem,participant=participant,points=sub.points,isFull=isFull,active=active)
     sandbox.cleanup()
