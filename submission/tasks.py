@@ -3,8 +3,14 @@ from os.path import join as path_join
 from celery import shared_task
 from billiard import current_process
 
-from .models import Submission, RunInfo
+from .models import Submission, RunInfo, RunSubtaskInfo, RunFullInfo
 from sandbox.sandbox_manager import Sandbox
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from problem.consumers import UserConsumer
+
+from django.core import serializers
 
 
 def get_meta(sandbox, meta_file):
@@ -34,9 +40,29 @@ def clear_submission(sub):
     sub.current_test = 0
     Submission.objects.filter(pk=sub.pk).update(points=0, current_test=0)
 
+def status_socket(channel_name, context):
+    async_to_sync(get_channel_layer().group_send)(channel_name, context)
+
+def getPtsInfo(channel_name, submission_pk):
+        data = RunSubtaskInfo.objects.filter(submission__pk=submission_pk)
+        sub_desc = []
+
+        for info in data:
+            sub_desc.append(info.subtask.pk)
+        
+        data = serializers.serialize("json", data)
+
+        context = {
+            'type': 'send_pts_infos',
+            'data': data,
+            'sub_desc': sub_desc,
+            'attr': "#subtaskPts_{}_".format(submission_pk)
+        }
+
+        async_to_sync(get_channel_layer().group_send)(channel_name, context)
 
 @shared_task
-def evaluate_submission(sub_pk):
+def evaluate_submission(sub_pk, username=None):
     """ Evaluate or re-evaluate submission """
 
     sub = Submission.objects.get(pk=sub_pk)
@@ -48,17 +74,37 @@ def evaluate_submission(sub_pk):
 
     sub.status = Submission.STATUS.COMPILING
     sub.save()
-
+    if username:
+        status_socket("users_%s" % username, {
+        "type": "notify",
+        "sub_id": sub_pk,
+        "status": sub.status,
+        "points": sub.points
+        })
     # Compiling
     sandbox.create_file('main.cpp', str(sub.source), is_public=0)
     out, err = sandbox.run_cmd('g++ -o ' + path_join('box', 'main') + ' -std=c++11 -DONLINE_JUDGE main.cpp')
     if err != b'' or out != b'':
         sub.status = Submission.STATUS.COMPILATION_ERROR
         sub.save()
+        if username:
+            status_socket("users_%s" % username, {
+            "type": "notify",
+            "sub_id": sub_pk,
+            "status": sub.status,
+            "points": sub.points
+            })
         return
 
     sub.status = Submission.STATUS.TESTING
     sub.save()
+    if username:
+        status_socket("users_%s" % username, {
+        "type": "notify",
+        "sub_id": sub_pk,
+        "status": sub.status,
+        "points": sub.points
+        })
 
     # TODO properly access static files
     with open(path_join('.', 'submission', 'static', 'submission', 'testlib.h'), 'r') as testlib_file:
@@ -71,6 +117,13 @@ def evaluate_submission(sub_pk):
         print(err.decode('utf-8'))
         sub.status = Submission.STATUS.ERROR
         sub.save()
+        if username:
+            status_socket("users_%s" % username, {
+            "type": "notify",
+            "sub_id": sub_pk,
+            "status": sub.status,
+            "points": sub.points
+            })
         return
 
     problem_constraints = sub.problem.statement
@@ -79,12 +132,19 @@ def evaluate_submission(sub_pk):
         if participant.submission_set.filter(problem=sub.problem).order_by('-points'):
             participant.points -= participant.submission_set.filter(problem=sub.problem).order_by(
                 '-points').first().points
+    isFull = True
     for subtask in sub.problem.subtask_set.order_by('subtask_id'):
         cur_points = subtask.points
         for test in subtask.test_set.order_by('test_id'):
             sub.current_test = test.test_id
             sub.save()
-
+            if username:
+                status_socket("users_%s" % username, {
+                "type": "notify",
+                "sub_id": sub_pk,
+                "status": sub.status,
+                "points": sub.points
+                })
             run_solution(sandbox, 'main', problem_constraints, test)
 
             meta = get_meta(sandbox, 'meta')
@@ -101,6 +161,14 @@ def evaluate_submission(sub_pk):
                     run_info.status = RunInfo.STATUS.OK
                     run_info.time = float(meta['time'])
                     test.output = run_info.output
+                    inputBR = test.input.count("\n")
+                    outputBR = test.output.count("\n")
+                    br_numberInput = max(0, outputBR - inputBR)
+                    br_numberOutput = max(0, inputBR - outputBR)
+                    for _ in range(br_numberInput):
+                        test.input += "\r\n"
+                    for _ in range(br_numberOutput):
+                        test.output += "\r\n"
                     test.save()
                 else:
                     ans_file = 'test.a'
@@ -131,12 +199,40 @@ def evaluate_submission(sub_pk):
                 run_info.status = RunInfo.STATUS.XX
             if run_info.status != RunInfo.STATUS.OK:
                 cur_points = 0
+                isFull = False
             run_info.save()
+            if username:
+                status_socket("users_%s" % username, {
+                "type": "test_checked",
+                "test_id": run_info.test.test_id,
+                "message": run_info.message(),
+                "time": run_info.time,
+                "attr": "#info_{}_{}".format(sub.pk, subtask.subtask_id),
+                })
         sub.points += cur_points
+        if not RunSubtaskInfo.objects.filter(submission=sub, subtask=subtask):
+            RunSubtaskInfo.objects.create(submission=sub, subtask=subtask)
+        RunSubtaskInfo.objects.filter(submission=sub, subtask=subtask).update(points=cur_points)
+        if username:
+             getPtsInfo("users_%s" % username, sub.pk)
         sub.save()
     sub.status = Submission.STATUS.FINISHED
     sub.save()
+
+    if username:
+        status_socket("users_%s" % username, {
+        "type": "notify",
+        "sub_id": sub_pk,
+        "status": sub.status,
+        "points": sub.points
+        })
+
     if not sub.is_invocation:
         participant.points += participant.submission_set.filter(problem=sub.problem).order_by('-points').first().points
         participant.save()
+
+        active = True
+        if RunFullInfo.objects.filter(isFull=True,problem=sub.problem,participant=participant):
+            active = False
+        RunFullInfo.objects.create(submission=sub, problem=sub.problem,participant=participant,points=sub.points,isFull=isFull,active=active)
     sandbox.cleanup()

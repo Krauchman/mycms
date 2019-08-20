@@ -4,10 +4,10 @@
 <h1 class="mt-4"> Contest list </h1>
 <ol>
   {% for contest in contest_list %}
-  <li>
-    {% url 'contest-info' contest.pk as the_url %}
-    <a href="{{ the_url }}">{{ contest.title }}</a>
-  </li>
+  {% url 'contest-info' contest.pk as the_url %}
+  <h3>
+    <li><a href="{{ the_url }}">{{ contest.title }}</a></li>
+  </h3>
   {% endfor %}
 </ol>
 {% endblock %}

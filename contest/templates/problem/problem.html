@@ -1,36 +1,294 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'index.html' %}
+{% block title %}{{ statement.name }}{% endblock %}
+{% block sidebar %}
+{% url 'contest-info' contest.pk as the_url %}
+<a href="{{ the_url }}" class="list-group-item list-group-item-action bg-light">Overview</a>
+{% if contest_state.0 == STATE.IN_PROGRESS %}
+{% for problem in problems %}
+{% url 'problem-page' contest.pk problem.problem_id as the_url %}
+<a href="{{ the_url }}" class="list-group-item list-group-item-action bg-light">{{ problem.name }}
+</a>
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="nav justify-content-center">
+    <h1 class="nav-item mt-4 text-primary"> {{ statement.name}} </h1>
+</div>
+<div class="nav justify-content-center">
+    <p><span class="font-weight-bold">Формат ввода:</span> {{ statement.input_file }}</p>
+</div>
+<div class="nav justify-content-center">
+    <p><span class="font-weight-bold">Формат вывода:</span> {{ statement.output_file }}</p>
+</div>
+<div class="nav justify-content-center">
+    <p><span class="font-weight-bold">Ограничение по времени на тест:</span> {{ statement.time_limit }} мс</p>
+</div>
+<div class="nav justify-content-center">
+    <p><span class="font-weight-bold">Ограничение по памяти на тест:</span> {{ statement.memory_limit }} мб</p>
+</div>
+<p>{{ statement.legend }}</p>
+<b>Входные данные</b>
+<p>{{ statement.input }}</p>
+<b>Выходные данные</b>
+<p>{{ statement.output }}</p>
+<div class="d-flex justify-content-start">
+    <div class="card">
+        <div class=" card-header">
+            Input examples
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for i in samples %}
+            <li class="list-group-item" style="white-space: pre-line"><samp>{{ i.input }}</samp></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            Output examples
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for i in samples %}
+            <li class="list-group-item" style="white-space: pre-line"><samp>{{ i.output }}</samp></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<b>Примечание</b>
+<p>{{ statement.notes }}</p>
+<h3>Submit your solution</h3>
+<form method="POST" style="width:70%">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="sub_language">Language</label>
+        <select class="form-control" id="sub_language" name="sub_language">
+            <option value="0">C++11</option>
+            <option value="1">Java</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="sub_source">Source code</label>
+        <textarea class="form-control" id="sub_source" rows="10" name="sub_source"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" id="submit">Submit!</button>
+</form>
+<h4 class="mt-4"> Your submissions: </h4>
+<div class="d-flex justify-content-start mt-4 mb-4">
+    <div class="card">
+        <div class=" card-header">
+            Status
+        </div>
+        <ol class="list-group list-group-flush">
+            {% for submission in submissions %}
+            <li class="list-group-item"><samp id="status_{{submission.pk}}">
+                    {% if submission.status == 0 %}
+                    In queue...
+                    {% elif submission.status == 1 %}
+                    Compiling...
+                    {% elif submission.status == 2 %}
+                    Compilation Error
+                    {% elif submission.status == 3 %}
+                    Testing...
+                    {% elif submission.status == 4 %}
+                    Finished
+                    {% elif submission.status == 5 %}
+                    Error occured
+                    {% endif %}
+                </samp></li>
+            {% endfor %}
+        </ol>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            Points
+        </div>
+        <ol class="list-group list-group-flush">
+            {% for submission in submissions %}
+            <li class="list-group-item"><samp><span
+                        id="pts_{{submission.pk}}">{{ submission.points }}</span>/{{ total }}</samp></li>
+            {% endfor %}
+        </ol>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            Links
+        </div>
+        <ol class="list-group list-group-flush">
+            {% for submission in submissions %}
+            <li class="list-group-item text-primary" type="button"><u><samp data-toggle="modal"
+                        data-target="#viewSub{{submission.pk}}" onclick="getSubtasksPtsInfo({{submission.pk}})">
+                        View</samp></u>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+{% for submission in submissions %}
+<div class="modal fade bd-example-modal-xl" id="viewSub{{submission.pk}}" tabindex="-1" role="dialog"
+    aria-labelledby="viewSub{{submission.pk}}Title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewSub{{submission.pk}}Title">Submission details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-start">
+                    <div class="card">
+                        <div class=" card-header">
+                            Subtask description
+                        </div>
+                        <ol class="list-group list-group-flush">
+                            {% for subtask in subtasks %}
+                            <li class="list-group-item"><samp>
+                                    {{subtask.description}}
+                                </samp>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <div class=" card-header">
+                            Points
+                        </div>
+                        <ol class="list-group list-group-flush">
+                            {% for subtask in subtasks %}
+                            <li class="list-group-item">
+                                <code>
+                                    <span id="subtaskPts_{{submission.pk}}_{{subtask.pk}}">
+                                </span>
+                                    / {{subtask.points}}
+                                </code>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <div class=" card-header">
+                            Details
+                        </div>
+                        <ol class="list-group list-group-flush">
+                            {% for subtask in subtasks %}
+                            <li class="list-group-item"><span type="button" data-toggle="collapse"
+                                    data-target="#collapse{{submission.pk}}-{{subtask.subtask_id}}"
+                                    aria-expanded="false" class="text-primary"
+                                    aria-controls="collapse{{submission.pk}}-{{subtask.subtask_id}}"
+                                    onclick="get_info({{submission.pk}}, {{subtask.subtask_id}})">
+                                    View
+                                </span>
+                                <div class="collapse" id="collapse{{submission.pk}}-{{subtask.subtask_id}}">
+                                    <div class="card card-body">
+                                        <table class="table table-striped">
+                                            <tbody id="info_{{submission.pk}}_{{subtask.subtask_id}}">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Verdict</th>
+                                                    <th>Time (ms)</th>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+                <div class="container bg-dark mt-5">
+                    <pre><code class="text-light">{{submission.source}}</code></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+    const username = '{{ username }}';
+    const userSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/user/' + username + '/');
+    addInfo = function (attr, test_id, message, time) {
+        let node = document.createElement("tr");
+        let tmpNode = document.createElement("td");
+        tmpNode.textContent = test_id;
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("td");
+        tmpNode.textContent = message;
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("td");
+        tmpNode.textContent = time;
+        node.appendChild(tmpNode);
+        document.querySelector(attr).appendChild(node);
+    }
+    addTitleInfo = function (attr) {
+        let node = document.createElement("tr");
+        let tmpNode = document.createElement("th");
+        tmpNode.textContent = "#";
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("th");
+        tmpNode.textContent = "Verdict";
+        node.appendChild(tmpNode);
+        tmpNode = document.createElement("th");
+        tmpNode.textContent = "time";
+        node.appendChild(tmpNode);
+        document.querySelector(attr).appendChild(node);
+    }
+    get_info = function (submission_id, subtask_id) {
+        userSocket.send(JSON.stringify({
+            'type': 'get_info',
+            'submission': submission_id,
+            'subtask': subtask_id
+        }))
+    }
+    getSubtasksPtsInfo = function (submission_pk) {
+        userSocket.send(JSON.stringify({
+            'type': 'getSubtasksPtsInfo',
+            'submission': submission_pk
+        }))
+    }
+    userSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data['type'] == 'sub_notify') {
+            const sub_pk = data['submission_pk'];
+            const status = data['status'];
+            const points = data['sub_points'];
+            document.querySelector('#status_' + sub_pk).innerText = status;
+            document.querySelector('#pts_' + sub_pk).innerText = points;
+        }
+        else if (data['type'] == 'run_info') {
+            const message = data['message'];
+            const time = data['time'];
+            const test_id = data['test_id'];
+            const attr = data['attr'];
+            addInfo(attr, test_id, message, time);
+        }
+        else if (data['type'] == 'runInfos') {
+            const info_data = JSON.parse(data['data']);
+            const attr = data['attr'];
+            $(attr).empty();
+            addTitleInfo(attr);
+            for (let counter = 0; counter < info_data.length; counter++) {
+                addInfo(attr, data['test_ids'][counter], info_data[counter]['fields']['status'], info_data[counter]['fields']['time']);
+            }
+        }
+        else if (data['type'] == 'subtaskPtsInfos') {
+            const info_data = JSON.parse(data['data']);
+            const attr = data['attr'];
+            for (let counter = 0; counter < info_data.length; counter++) {
+                $(attr + info_data[counter]["pk"]).empty();
+                document.querySelector(attr + data["sub_desc"][counter]).textContent = info_data[counter]["fields"]["points"];
+            }
+        }
+    };
 
-<head>
-    <meta charset="UTF-8">
-    <title>{{ statement.name }}</title>
-</head>
-
-<body>
-    <h1>{{ statement.name}}</h1>
-    <p>формат ввода {{ statement.input_file }}</p>
-    <p>формат вывода {{ statement.output_file }}</p>
-    <p>ограничение по времени на тест: {{ statement.time_limit }} мс</p>
-    <p>ограничение по памяти на тест: {{ statement.memory_limit }} мб</p>
-    <p>{{ statement.legend }}</p>
-    <b>Входные данные</b>
-    <p>{{ statement.input }}</p>
-    <b>Выходные данные</b>
-    <p>{{ statement.output }}</p>
-    {% for i in samples %}
-    <p>{{ i.input }}</p>
-    {% endfor %}
-    {% for i in samples %}
-    <p>{{ i.output }}</p>
-    {% endfor %}
-    <b>Примечание</b>
-    <p>{{ statement.notes }}</p>
-    <h3>Submit your solution</h3>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit!</button>
-    </form>
-</body>
-
-</html>
+    userSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
+{% endblock %}

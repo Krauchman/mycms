@@ -1,3 +1,6 @@
+{% extends 'index.html' %}
+{% block title %}Submission details{% endblock %}
+{% block content %}
 <h2>Submission ID: {{ sub.pk }}</h2>
 
 <h2>STATUS: {{ status }}</h2>
@@ -9,12 +12,15 @@
         <th>Time (ms)</th>
     </tr>
     {% for runinfo in runinfo_list %}
-        <tr>
-            <td>{{ runinfo.test.test_id }}</td>
-            <td>{{ runinfo.message }}</td>
-            <td>{{ runinfo.time }}</td>
-        </tr>
+    <tr>
+        <td>{{ runinfo.test.test_id }}</td>
+        <td>{{ runinfo.message }}</td>
+        <td>{{ runinfo.time }}</td>
+    </tr>
     {% endfor %}
 </table>
 <h3>{{ sub.points }} points</h3>
-<p><pre><code>{{ sub.source }}</code></pre></p>
+<p>
+    <pre><code>{{ sub.source }}</code></pre>
+</p>
+{% endblock %}

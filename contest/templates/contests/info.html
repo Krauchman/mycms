@@ -1,29 +1,31 @@
 {% extends 'index.html' %}
 {% block title %}{{ contest.title }}{% endblock %}
-
-{% block content %}
-<h1 class="mt-4"> {{ contest.title }} </h1>
+{% block sidebar %}
+{% url 'contest-info' contest.pk as the_url %}
+<a href="{{ the_url }}" class="list-group-item list-group-item-action bg-light">Overview</a>
 {% if contest_state.0 == STATE.IN_PROGRESS %}
-<h2>In progress. Time left: {{ contest_state.1 }}</h2>
+{% for problem in problems %}
+{% url 'problem-page' contest.pk problem.problem_id as the_url %}
+<a href="{{ the_url }}" class="list-group-item list-group-item-action bg-light">{{ problem.name }}
+</a>
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="nav justify-content-center">
+  <h1 class="nav-item mt-4 text-primary"> {{ contest.title }} </h1>
+</div>
+{% if contest_state.0 == STATE.IN_PROGRESS %}
+<h2><code>In progress.</code>Time left: {{ contest_state.1 }}</h2>
 {% elif contest_state.0 == STATE.NOT_STARTED %}
 <h2>Contest starts in: {{ contest_state.1 }}</h2>
 {% else %}
-<h2>The contest is over.</h2>
+<h2 class="text-danger">The contest is over.</h2>
 {% endif %}
 
-<h3>Hi! Your score is {{ score }} </h3>
+<h3>Hi {{ username }}!</h3>
+<h4>Your score is {{ score }}</h4>
 <p>Start Time: {{ contest.start_time|date:"M d, h:m:s" }}</p>
-<p>End Time: {{ contest.end_time|date:"M d, h:m:s" }}</p>
-<p>Current time: {{ current_time|date:"M d, h:m:s" }}</p>
-
-{% for problem in problems %}
-<h2>
-  <li>
-    {% url 'problem-page' contest.pk problem.problem_id as the_url %}
-    <a href="{{ the_url }}">
-      {{ problem.name }}
-    </a>
-  </li>
-</h2>
-{% endfor %}
+<p class="text-danger">End Time: {{ contest.end_time|date:"M d, h:m:s" }}</p>
+<p class="text-success">Current time: {{ current_time|date:"M d, h:m:s" }}</p>
 {% endblock %}
