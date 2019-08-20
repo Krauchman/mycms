@@ -163,54 +163,54 @@ class UserConsumer(AsyncWebsocketConsumer):
 
         await self.send(text_data=json.dumps(context))
 
-class RankingConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['contest_pk']
-        self.room_group_name = 'ranking_%s' % self.room_name
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+# class RankingConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         self.room_name = self.scope['url_route']['kwargs']['contest_pk']
+#         self.room_group_name = 'ranking_%s' % self.room_name
+#         # Join room group
+#         await self.channel_layer.group_add(
+#             self.room_group_name,
+#             self.channel_name
+#         )
 
-        await self.accept()
+#         await self.accept()
     
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+#     async def disconnect(self, close_code):
+#         # Leave room group
+#         await self.channel_layer.group_discard(
+#             self.room_group_name,
+#             self.channel_name
+#         )
 
-    @database_sync_to_async
-    def getProblem(self):
-        return Contest.objects.filter(pk=int(self.room_name)).first().problem_set.all()
-    @database_sync_to_async
-    def getParticipant(self):
-        return Participant.objects.filter(contest__pk=int(self.room_name))
+#     @database_sync_to_async
+#     def getProblem(self):
+#         return Contest.objects.filter(pk=int(self.room_name)).first().problem_set.all()
+#     @database_sync_to_async
+#     def getParticipant(self):
+#         return Participant.objects.filter(contest__pk=int(self.room_name))
 
-    async def getAllRanking(self):
-        contestData = await self.getProblem()
-        participantData = await self.getParticipant()
-        contestData = serializers.serialize("json", contestData)
-        participantData = ParticipantSerializer(instance=participantData)
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'sendAllRanking',
-                'contestData': contestData,
-                'participantData': participantData,
-            }
-        )
-    async def sendAllRanking(self, event):
-        context = {
-            'type': 'rankingAll',
-            'contestData': event['contestData'],
-            'participantData': event['participantData'],
-        }
-        await self.send(text_data=json.dumps(context))
+#     async def getAllRanking(self):
+#         contestData = await self.getProblem()
+#         participantData = await self.getParticipant()
+#         contestData = serializers.serialize("json", contestData)
+#         participantData = ParticipantSerializer(instance=participantData)
+#         await self.channel_layer.group_send(
+#             self.room_group_name,
+#             {
+#                 'type': 'sendAllRanking',
+#                 'contestData': contestData,
+#                 'participantData': participantData,
+#             }
+#         )
+#     async def sendAllRanking(self, event):
+#         context = {
+#             'type': 'rankingAll',
+#             'contestData': event['contestData'],
+#             'participantData': event['participantData'],
+#         }
+#         await self.send(text_data=json.dumps(context))
 
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        if text_data_json['type'] == 'getRanking':
-            await self.getAllRanking()
+#     async def receive(self, text_data):
+#         text_data_json = json.loads(text_data)
+#         if text_data_json['type'] == 'getRanking':
+#             await self.getAllRanking()
