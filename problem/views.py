@@ -24,20 +24,6 @@ def problem_page(request, contest_pk, problem_pk):
             sub.contest = Contest.objects.get(pk=contest_pk)
             sub.save()
 
-<<<<<<< HEAD
-            evaluate_submission.delay(sub.pk)
-
-            return redirect('submission-page', contest_pk=contest_pk, sub_pk=sub.pk)
-    else:
-        form = SubmitForm()
-    
-    contest = get_object_or_404(Contest, pk=contest_pk)
-    problem = get_object_or_404(Problem, problem_id=problem_pk, contests=contest)
-    context = {
-        'statement': problem.statement,
-        'samples': problem.test_set.filter(in_statement=True),
-        'form': form,
-=======
             evaluate_submission.delay(sub_pk = sub.pk, username = request.user.username)
 
             return redirect('problem-page', contest_pk=contest_pk, problem_pk=problem_pk)
@@ -61,7 +47,6 @@ def problem_page(request, contest_pk, problem_pk):
         'subtasks': subtasks,
         'total': total,
         'username': request.user.username,
->>>>>>> demo-frontend
     }
 
     return render(request, 'problem/problem.html', context)
